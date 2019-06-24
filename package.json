@@ -1,0 +1,40 @@
+{
+  "name": "berbix-react-native",
+  "version": "0.0.5",
+  "description": "React Native SDK for the Berbix Verify flow",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src --out-file index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/berbix/berbix-react-native.git"
+  },
+  "keywords": [
+    "berbix",
+    "react",
+    "identity"
+  ],
+  "files": [
+    "index.js"
+  ],
+  "author": "Eric Levine <eric@berbix.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/berbix/berbix-react-native/issues"
+  },
+  "homepage": "https://github.com/berbix/berbix-react-native#readme",
+  "dependencies": {
+    "prop-types": "^15.7.2",
+    "react": "16.8.3",
+    "react-native": "0.59.9",
+    "react-native-camera": "^2.11.0",
+    "react-native-webview": "^5.12.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-transform-react-jsx": "^7.3.0",
+    "@babel/preset-env": "^7.4.4"
+  }
+}

@@ -1,5 +1,5 @@
 import React, { Component, PureComponent } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native'
+import { View, StyleSheet, Text, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native'
 import { WebView } from 'react-native-webview';
 import { RNCamera } from 'react-native-camera';
 import PropTypes from 'prop-types';
@@ -76,6 +76,17 @@ const passportStyles = StyleSheet.create({
 
 
 class Camera extends PureComponent {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      ready: false,
+      loading: false,
+    };
+  }
+
+  cameraRef = React.createRef();
+
   cameraSide() {
     switch (this.props.step) {
       case 'FRONT':
@@ -88,9 +99,17 @@ class Camera extends PureComponent {
   }
 
   takePicture = async () => {
-    if (this.camera) {
-      const options = { quality: 0.8, base64: true, exif: true, doNotSave: true, width: 1600 };
-      const data = await this.camera.takePictureAsync(options);
+    if (this.cameraRef.current) {
+      const options = {
+        quality: 0.8,
+        base64: true,
+        exif: true,
+        doNotSave: true,
+        width: 1600,
+      };
+      this.setState({ loading: true });
+      this.cameraRef.current.pausePreview();
+      const data = await this.cameraRef.current.takePictureAsync(options);
       this.props.onPhotoCapture(data.base64, data.exif);
     }
   }
@@ -102,6 +121,8 @@ class Camera extends PureComponent {
   statusChange = e => {
     if (e.cameraStatus === 'NOT_AUTHORIZED') {
       this.props.onError({ message: 'Camera must be authorized to capture ID photos.' })
+    } else if (e.cameraStatus === 'READY') {
+      this.setState({ ready: true });
     }
   }
 
@@ -126,9 +147,7 @@ class Camera extends PureComponent {
     return (
       <View style={styles.cameraContainer}>
         <RNCamera
-          ref={ref => {
-            this.camera = ref;
-          }}
+          ref={this.cameraRef}
           style={styles.preview}
           type={this.cameraSide()}
           flashMode={RNCamera.Constants.FlashMode.off}
@@ -147,13 +166,23 @@ class Camera extends PureComponent {
           captureAudio={false}
           onStatusChange={this.statusChange}
           {...barcodeProps}
-        />
-        {this.renderOverlay()}
-        <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity onPress={this.takePicture} style={styles.capture}>
-            <Text style={{ fontSize: 14 }}>Take photo</Text>
-          </TouchableOpacity>
-        </View>
+        >
+          {this.state.loading && (
+            <View style={[styles.loadingContainer]}>
+              <ActivityIndicator size="large" />
+            </View>
+          )}
+        </RNCamera>
+        {this.state.ready && (
+          <>
+            {this.renderOverlay()}
+            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
+              <TouchableOpacity onPress={this.takePicture} style={styles.capture}>
+                <Text style={{ fontSize: 14 }}>Take photo</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
     );
   }
@@ -194,6 +223,7 @@ class BerbixVerify extends Component {
         base64: base64,
         format: 'jpg',
         exif: this.objectifyExif(exif),
+        overlay: true,
       },
     });
     this.setState({ capturing: false });
@@ -332,6 +362,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
     margin: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 });
 

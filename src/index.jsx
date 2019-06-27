@@ -85,11 +85,10 @@ class Camera extends PureComponent {
     };
   }
 
-  cameraRef = React.createRef();
-
   cameraSide() {
     switch (this.props.step) {
       case 'FRONT':
+      case 'PASSPORT':
       case 'BACK':
         return RNCamera.Constants.Type.back;
       case 'SELFIE':
@@ -98,8 +97,8 @@ class Camera extends PureComponent {
     }
   }
 
-  takePicture = async () => {
-    if (this.cameraRef.current && !this.state.loading) {
+  takePicture = async camera => {
+    if (!this.state.loading) {
       const options = {
         quality: 0.8,
         base64: true,
@@ -107,24 +106,15 @@ class Camera extends PureComponent {
         doNotSave: true,
         width: 1600,
       };
-      this.cameraRef.current.pausePreview();
       this.setState({ loading: true });
-      const data = await this.cameraRef.current.takePictureAsync(options);
+      const data = await camera.takePictureAsync(options);
       this.props.onPhotoCapture(data.base64, data.exif);
-    }
-  }
-
-  statusChange = e => {
-    if (e.cameraStatus === 'NOT_AUTHORIZED') {
-      this.props.onError({ message: 'Camera must be authorized to capture ID photos.' })
-    } else if (e.cameraStatus === 'READY') {
-      this.setState({ ready: true });
     }
   }
 
   renderOverlay() {
     const { idType, step } = this.props;
-    if (step === 'FRONT' || step === 'BACK') {
+    if (step === 'FRONT' || step === 'BACK' || step === 'PASSPORT') {
       return <Overlay idType={idType || 'card'} />
     }
     return null;
@@ -138,10 +128,11 @@ class Camera extends PureComponent {
 
     const side = this.cameraSide();
 
+    const pointOfInterest = side === RNCamera.Constants.Type.back ? { x: 0.5, y: 0.5 } : {};
+
     return (
       <View style={containerStyles}>
         <RNCamera
-          ref={this.cameraRef}
           style={styles.preview}
           type={side}
           flashMode={RNCamera.Constants.FlashMode.off}
@@ -159,24 +150,23 @@ class Camera extends PureComponent {
           }}
           captureAudio={false}
           onStatusChange={this.statusChange}
-          autoFocusPointOfInterest={side === RNCamera.Constants.Type.back ? { x: 0.5, y: 0.5 } : null}
+          {...pointOfInterest}
         >
-          {this.state.loading && (
-            <View style={[styles.loadingContainer]}>
-              <ActivityIndicator size="large" />
-            </View>
-          )}
+          {({ camera, status }) => {
+            if (status === 'READY' || !this.state.loading) {
+              return (
+                <>
+                  {this.renderOverlay()}
+                  <View style={styles.cameraButton}>
+                    <TouchableOpacity onPress={() =>this.takePicture(camera)} style={styles.capture} disabled={this.state.loading}>
+                      <Text style={{ fontSize: 14 }}>Take photo</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )
+            }
+          }}
         </RNCamera>
-        {this.state.ready && !this.state.loading && (
-          <>
-            {this.renderOverlay()}
-            <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-              <TouchableOpacity onPress={this.takePicture} style={styles.capture} disabled={this.state.loading}>
-                <Text style={{ fontSize: 14 }}>Take photo</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
       </View>
     );
   }
@@ -342,6 +332,14 @@ const styles = StyleSheet.create({
   cameraContainerLoading: {
     left: -10000,
     top: -10000,
+  },
+  cameraButton: {
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: 30,
+    width: '100%',
   },
   preview: {
     flex: 1,

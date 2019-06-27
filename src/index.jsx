@@ -131,17 +131,19 @@ class Camera extends PureComponent {
   }
 
   render() {
-    const buttonStyles = {
-      ...styles.capture,
-      ...(this.state.loading ? styles.captureLoading : {}),
-    }
+    const containerStyles = {
+      ...styles.cameraContainer,
+      ...(this.state.loading ? styles.cameraContainerLoading : {}),
+    };
+
+    const side = this.cameraSide();
 
     return (
-      <View style={styles.cameraContainer}>
+      <View style={containerStyles}>
         <RNCamera
           ref={this.cameraRef}
           style={styles.preview}
-          type={this.cameraSide()}
+          type={side}
           flashMode={RNCamera.Constants.FlashMode.off}
           androidCameraPermissionOptions={{
             title: 'Permission to use camera',
@@ -157,6 +159,7 @@ class Camera extends PureComponent {
           }}
           captureAudio={false}
           onStatusChange={this.statusChange}
+          autoFocusPointOfInterest={side === RNCamera.Constants.Type.back ? { x: 0.5, y: 0.5 } : null}
         >
           {this.state.loading && (
             <View style={[styles.loadingContainer]}>
@@ -164,11 +167,11 @@ class Camera extends PureComponent {
             </View>
           )}
         </RNCamera>
-        {this.state.ready && (
+        {this.state.ready && !this.state.loading && (
           <>
             {this.renderOverlay()}
             <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-              <TouchableOpacity onPress={this.takePicture} style={buttonStyles} disabled={this.state.loading}>
+              <TouchableOpacity onPress={this.takePicture} style={styles.capture} disabled={this.state.loading}>
                 <Text style={{ fontSize: 14 }}>Take photo</Text>
               </TouchableOpacity>
             </View>
@@ -336,6 +339,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  cameraContainerLoading: {
+    left: -10000,
+    top: -10000,
+  },
   preview: {
     flex: 1,
     position: 'absolute',
@@ -352,10 +359,7 @@ const styles = StyleSheet.create({
     padding: 15,
     paddingHorizontal: 20,
     alignSelf: 'center',
-    margin: 20,
-  },
-  captureLoading: {
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    marginBottom: 30,
   },
   loadingContainer: {
     flex: 1,

@@ -85,6 +85,8 @@ class Camera extends PureComponent {
     };
   }
 
+  cameraRef = React.createRef();
+
   cameraSide() {
     switch (this.props.step) {
       case 'FRONT':
@@ -97,8 +99,8 @@ class Camera extends PureComponent {
     }
   }
 
-  takePicture = async camera => {
-    if (!this.state.loading) {
+  takePicture = async () => {
+    if (this.cameraRef.current && !this.state.loading) {
       const options = {
         quality: 0.8,
         base64: true,
@@ -107,8 +109,16 @@ class Camera extends PureComponent {
         width: 1600,
       };
       this.setState({ loading: true });
-      const data = await camera.takePictureAsync(options);
+      const data = await this.cameraRef.current.takePictureAsync(options);
       this.props.onPhotoCapture(data.base64, data.exif);
+    }
+  }
+
+  statusChange = e => {
+    if (e.cameraStatus === 'NOT_AUTHORIZED') {
+      this.props.onError({ message: 'Camera must be authorized to capture photos.' });
+    } else if (e.cameraStatus === 'READY') {
+      this.setState({ ready: true });
     }
   }
 
@@ -133,6 +143,7 @@ class Camera extends PureComponent {
     return (
       <View style={containerStyles}>
         <RNCamera
+          ref={this.cameraRef}
           style={styles.preview}
           type={side}
           flashMode={RNCamera.Constants.FlashMode.off}
@@ -151,22 +162,17 @@ class Camera extends PureComponent {
           captureAudio={false}
           onStatusChange={this.statusChange}
           {...pointOfInterest}
-        >
-          {({ camera, status }) => {
-            if (status === 'READY' || !this.state.loading) {
-              return (
-                <>
-                  {this.renderOverlay()}
-                  <View style={styles.cameraButton}>
-                    <TouchableOpacity onPress={() =>this.takePicture(camera)} style={styles.capture} disabled={this.state.loading}>
-                      <Text style={{ fontSize: 14 }}>Take photo</Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              )
-            }
-          }}
-        </RNCamera>
+        />
+        {this.state.ready && !this.state.loading && (
+          <>
+            {this.renderOverlay()}
+            <View style={styles.cameraButton}>
+              <TouchableOpacity onPress={this.takePicture} style={styles.capture} disabled={this.state.loading}>
+                <Text style={{ fontSize: 14 }}>Take photo</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
     );
   }

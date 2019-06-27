@@ -99,7 +99,7 @@ class Camera extends PureComponent {
   }
 
   takePicture = async () => {
-    if (this.cameraRef.current) {
+    if (this.cameraRef.current && !this.state.loading) {
       const options = {
         quality: 0.8,
         base64: true,
@@ -107,15 +107,11 @@ class Camera extends PureComponent {
         doNotSave: true,
         width: 1600,
       };
-      this.setState({ loading: true });
       this.cameraRef.current.pausePreview();
+      this.setState({ loading: true });
       const data = await this.cameraRef.current.takePictureAsync(options);
       this.props.onPhotoCapture(data.base64, data.exif);
     }
-  }
-
-  detectBarcode = e => {
-    //console.log(e);
   }
 
   statusChange = e => {
@@ -135,14 +131,10 @@ class Camera extends PureComponent {
   }
 
   render() {
-    const { step, backFormat } = this.props;
-
-    const scanBarcode = step === 'BACK' && backFormat === 'pdf417';
-    const barcodeProps = scanBarcode ? {
-      onGoogleVisionBarcodesDetected: this.detectBarcode,
-      barCodeTypes: [RNCamera.Constants.BarCodeType.pdf417, RNCamera.Constants.BarCodeType.code128],
-      onBarCodeRead: this.detectBarcode,
-    } : {};
+    const buttonStyles = {
+      ...styles.capture,
+      ...(this.state.loading ? styles.captureLoading : {}),
+    }
 
     return (
       <View style={styles.cameraContainer}>
@@ -165,7 +157,6 @@ class Camera extends PureComponent {
           }}
           captureAudio={false}
           onStatusChange={this.statusChange}
-          {...barcodeProps}
         >
           {this.state.loading && (
             <View style={[styles.loadingContainer]}>
@@ -177,7 +168,7 @@ class Camera extends PureComponent {
           <>
             {this.renderOverlay()}
             <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-              <TouchableOpacity onPress={this.takePicture} style={styles.capture}>
+              <TouchableOpacity onPress={this.takePicture} style={buttonStyles} disabled={this.state.loading}>
                 <Text style={{ fontSize: 14 }}>Take photo</Text>
               </TouchableOpacity>
             </View>
@@ -362,6 +353,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
     margin: 20,
+  },
+  captureLoading: {
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   loadingContainer: {
     flex: 1,

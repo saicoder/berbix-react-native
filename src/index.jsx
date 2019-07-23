@@ -276,14 +276,15 @@ class BerbixVerify extends Component {
   }
 
   frameUrl() {
-    const { overrideUrl, version, clientId, role, email, phone, continuation, clientToken } = this.props;
+    const { overrideUrl, version, clientId, role, templateKey, email, phone, continuation, clientToken } = this.props;
     if (overrideUrl != null) {
       return overrideUrl;
     }
     const token = clientToken || continuation;
+    const template = templateKey || role;
     return (this.baseUrl() + '/' + version + '/verify') +
       ('?client_id=' + clientId) +
-      ('&role=' + role) +
+      (template ? '&template=' + template : '') +
       '&mode=rn' +
       (email ? '&email=' + encodeURIComponent(email) : '') +
       (phone ? '&phone=' + encodeURIComponent(phone) : '') +
@@ -291,7 +292,7 @@ class BerbixVerify extends Component {
   }
 
   render() {
-    const { env, clientId, role, continuation, email, phone, ...props } = this.props;
+    const { env, clientId, continuation, email, phone, ...props } = this.props;
 
     return (
       <View {...props} style={styles.frameContainer}>
@@ -374,20 +375,29 @@ const styles = StyleSheet.create({
 });
 
 BerbixVerify.propTypes = {
-  onComplete: PropTypes.func.isRequired,
   clientId: PropTypes.string.isRequired,
-  role: PropTypes.string.isRequired,
+
+  // Configurations
+  clientToken: PropTypes.string,
+  templateKey: PropTypes.string,
+  email: PropTypes.string,
+  phone: PropTypes.string,
+
+  // Event handlers
+  onComplete: PropTypes.func.isRequired,
   onError: PropTypes.func,
   onDisplay: PropTypes.func,
   onStateChange: PropTypes.func,
+
+  // Internal use
   baseUrl: PropTypes.string,
-  environment: PropTypes.oneOf(['sandbox', 'staging', 'production']),
   overrideUrl: PropTypes.string,
+  environment: PropTypes.oneOf(['sandbox', 'staging', 'production']),
   version: PropTypes.string,
-  email: PropTypes.string,
-  phone: PropTypes.string,
+
+  // Deprecated
   continuation: PropTypes.string,
-  clientToken: PropTypes.string,
+  role: PropTypes.string,
 };
 
 BerbixVerify.defaultProps = {

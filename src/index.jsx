@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import { RNCamera } from 'react-native-camera';
 import PropTypes from 'prop-types';
 
+const SDK_VERSION = '0.0.8';
 
 const Overlay = ({ idType }) => {
   const stylesheet = idType === 'passport' ? passportStyles : cardStyles;
@@ -288,7 +289,8 @@ class BerbixVerify extends Component {
       '&mode=rn' +
       (email ? '&email=' + encodeURIComponent(email) : '') +
       (phone ? '&phone=' + encodeURIComponent(phone) : '') +
-      (token ? '&client_token=' + token : '') ;
+      (token ? '&client_token=' + token : '') +
+      ('&sdk=BerbixReactNative-' + SDK_VERSION);
   }
 
   render() {

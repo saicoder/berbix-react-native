@@ -1,10 +1,9 @@
 {
   "name": "berbix-react-native",
-  "version": "0.1.1",
+  "version": "0.1.2-beta1",
   "description": "React Native SDK for the Berbix Verify flow",
   "main": "index.js",
   "scripts": {
-    "build": "babel src --out-file index.js",
     "webpack": "webpack"
   },
   "repository": {

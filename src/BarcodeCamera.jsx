@@ -188,7 +188,8 @@ const styles = StyleSheet.create({
   },
   fallbackButton: {
     flexDirection: "row",
-    justifyContent: "center"
+    justifyContent: "center",
+    padding: 10
   },
   fallbackButtonText: {
     color: "#4885C5"

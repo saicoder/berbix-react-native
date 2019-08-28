@@ -12,5 +12,5 @@ git commit -m "Updating Berbix React Native SDK version to $VERSION"
 git tag -a $VERSION -m "Version $VERSION"
 git push --follow-tags
 
-npm run build
+npm run webpack
 npm publish

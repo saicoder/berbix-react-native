@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import IDCamera from "./IDCamera";
 import BarcodeCamera from "./BarcodeCamera";
 
-export const SDK_VERSION = "0.0.9";
+export const SDK_VERSION = "0.1.3";
 
 const captureMode = {
   id: 1,

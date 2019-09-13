@@ -1,4 +1,4 @@
-# Berbix React SDK
+# Berbix React SDK for Expo
 
 This Berbix React Native library provides simple interfaces to interact with the Berbix Verify flow.
 

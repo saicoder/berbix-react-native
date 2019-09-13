@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { RNCamera } from "react-native-camera";
+import { Camera as RNCamera } from "expo"
 import Overlay from "./Overlay";
 
 export default class IDCamera extends PureComponent {
@@ -91,7 +91,8 @@ export default class IDCamera extends PureComponent {
             buttonNegative: "Cancel"
           }}
           captureAudio={false}
-          onStatusChange={this.statusChange}
+          onCameraReady={() => this.statusChange({ cameraStatus: 'READY' })}
+          onMountError={() => this.statusChange({ cameraStatus: 'NOT_AUTHORIZED' })}
           {...pointOfInterest}
         />
         {this.state.ready && !this.state.loading && (

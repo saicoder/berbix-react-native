@@ -9,7 +9,7 @@ import {
   Linking
 } from "react-native";
 import Overlay from "./Overlay";
-import { RNCamera } from "react-native-camera";
+import { Camera as RNCamera } from "expo"
 import { SDK_VERSION } from "./BerbixVerify";
 
 export default class Camera extends PureComponent {

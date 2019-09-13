@@ -12,7 +12,8 @@ module.exports = {
     "prop-types": "prop-types",
     "react-native": "react-native",
     "react-native-webview": "react-native-webview",
-    "react-native-camera": "react-native-camera"
+    "react-native-camera": "react-native-camera",
+    "expo": "expo"
   },
   resolve: {
     extensions: [".js", ".jsx"]
